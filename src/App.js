@@ -20,12 +20,10 @@ function App() {
   const sidebarRef = useRef(null);
   const location = useLocation();
 
-  // Toggle sidebar
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Close sidebar on outside click
   useEffect(() => {
     function handleClickOutside(event) {
       if (
@@ -41,19 +39,16 @@ function App() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Close sidebar on route change
   useEffect(() => {
     setSidebarOpen(false);
   }, [location]);
 
   return (
     <div className="d-flex app-layout">
-      {/* Hamburger Icon */}
       <div className="menu-icon d-md-none" onClick={toggleSidebar}>
         <CgMenuGridO />
       </div>
 
-      {/* Sidebar */}
       <div
         ref={sidebarRef}
         className={`sidebar-fixed ${sidebarOpen ? 'open' : ''}`}
@@ -63,8 +58,6 @@ function App() {
           <IoCloseCircleOutline />
         </div>
       </div>
-
-      {/* Main Content */}
       <div className="content-scrollable flex-grow-1 p-3">
         <AppRoutes />
       </div>

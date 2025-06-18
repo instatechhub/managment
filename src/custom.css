@@ -41,6 +41,8 @@ html, body, #root {
     background-color: #fff;
     transform: translateX(-100%);
     z-index: 1000;
+    width: 80%;
+
   }
   .content-scrollable{
     margin-left: 0;
