@@ -1,0 +1,9 @@
+.attendance-card {
+  min-height: auto;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+.attendance-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0 10px rgba(0,0,0,0.15);
+}

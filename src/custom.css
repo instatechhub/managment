@@ -1,0 +1,30 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+.app-layout {
+  display: flex;
+  height: 100vh;
+}
+
+.sidebar-fixed {
+  width: 220px;
+  background-color: #1c1e21;
+  color: white;
+  height: 100vh;
+  overflow: hidden;
+  position: fixed;
+  left: 0;
+  top: 0;
+  bottom: 0;
+}
+
+.content-scrollable {
+  margin-left: 220px;
+  height: 100vh;
+  padding: 20px;
+  background-color: #f8f9fa;
+  overflow-y: scroll;
+}
