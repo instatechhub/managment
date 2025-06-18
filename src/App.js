@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route,useLocation } from "react-router-dom";
 import Sidebar from './Components/Sidebar/Sidebar';
 import AppRoutes from './Routes/AppRoutes';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './custom.css';
 import { CgMenuGridO } from "react-icons/cg";
 import { IoCloseCircleOutline } from "react-icons/io5";
+import Login from './Components/Login/Login';
 
 function AppWrapper() {
   return (
     <Router>
-      <App />
+      <Routes>
+      <Route path="/" element={<Login />} />
+      <Route path="/*" element={<App />} />
+    </Routes>
     </Router>
   );
 }

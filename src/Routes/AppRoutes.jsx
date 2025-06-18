@@ -9,7 +9,7 @@ import EmployeeAttendance from '../Components/Employee/EmployeeAttendance'
 
 const AppRoutes = () => (
   <Routes>
-    <Route path="/" element={<Dashboard />} />
+    <Route path="/dashboard" element={<Dashboard />} />
     <Route path="/add-employee" element={<AddEmployee />} />
     <Route path="/mark-attendance" element={<MarkAttendance />} />
     <Route path="/view-attendance" element={<ViewAttendance />} />
