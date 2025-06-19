@@ -1,5 +1,13 @@
 import React, { useState } from 'react';
-import { Form, Button, Container, Row, Col, Card } from 'react-bootstrap';
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  FloatingLabel,
+  Button,
+} from 'react-bootstrap';
 
 const EmployeeForm = () => {
   const [form, setForm] = useState({
@@ -11,6 +19,9 @@ const EmployeeForm = () => {
     designation: '',
     gender: '',
     status: 'Active',
+    accountNumber: '',
+    ifscCode: '',
+    bankName: '',
   });
 
   const handleChange = (e) => {
@@ -21,115 +32,166 @@ const EmployeeForm = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log(form);
-    alert("Employee added!");
+    alert('Employee added successfully!');
   };
 
   return (
-    <Container className="mt-4">
-      <Card>
-        <Card.Header as="h5">Add New Employee</Card.Header>
-        <Card.Body>
+    <Container className="py-4">
+      <Card className="shadow-sm border-0 rounded-4">
+        <Card.Header className=" fw-semibold fs-5">
+          Add New Employee
+        </Card.Header>
+
+        <Card.Body className="p-4">
           <Form onSubmit={handleSubmit}>
-            <Row>
+            <Row className="g-3">
+              {/* Personal Details */}
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Full Name</Form.Label>
+                <FloatingLabel controlId="name" label="Full Name">
                   <Form.Control
                     type="text"
                     name="name"
-                    placeholder="Enter employee name"
-                    required
+                    value={form.name}
                     onChange={handleChange}
+                    required
                   />
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Contact Number</Form.Label>
+                <FloatingLabel controlId="contact" label="Contact Number">
                   <Form.Control
                     type="tel"
                     name="contact"
-                    placeholder="e.g. 9876543210"
-                    required
+                    value={form.contact}
                     onChange={handleChange}
+                    required
                   />
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Joining Date</Form.Label>
+                <FloatingLabel controlId="joining" label="Joining Date">
                   <Form.Control
                     type="date"
                     name="joining"
-                    required
+                    value={form.joining}
                     onChange={handleChange}
+                    required
                   />
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Process Name</Form.Label>
+                <FloatingLabel controlId="process" label="Process Name">
                   <Form.Control
                     type="text"
                     name="process"
-                    placeholder="e.g. Sales, Support"
+                    value={form.process}
                     onChange={handleChange}
                   />
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Designation</Form.Label>
+                <FloatingLabel controlId="designation" label="Designation">
                   <Form.Control
                     type="text"
                     name="designation"
-                    placeholder="e.g. Executive, Manager"
+                    value={form.designation}
                     onChange={handleChange}
                   />
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Salary (₹)</Form.Label>
+                <FloatingLabel controlId="salary" label="Salary (₹)">
                   <Form.Control
                     type="number"
                     name="salary"
-                    placeholder="e.g. 30000"
+                    value={form.salary}
                     onChange={handleChange}
                   />
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Gender</Form.Label>
-                  <Form.Select name="gender" onChange={handleChange} defaultValue="">
-                    <option value="" disabled>Select gender</option>
+                <FloatingLabel controlId="gender" label="Gender">
+                  <Form.Select
+                    name="gender"
+                    value={form.gender}
+                    onChange={handleChange}
+                    required
+                  >
+                    <option value="">Select Gender</option>
                     <option>Male</option>
                     <option>Female</option>
                     <option>Other</option>
                   </Form.Select>
-                </Form.Group>
+                </FloatingLabel>
               </Col>
 
               <Col md={6}>
-                <Form.Group className="mb-3">
-                  <Form.Label>Status</Form.Label>
-                  <Form.Select name="status" onChange={handleChange} defaultValue="Active">
+                <FloatingLabel controlId="status" label="Status">
+                  <Form.Select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                  >
                     <option>Active</option>
                     <option>Inactive</option>
                   </Form.Select>
-                </Form.Group>
+                </FloatingLabel>
+              </Col>
+
+              {/* Bank Details Section */}
+              <Col xs={12}>
+                <h5 className="mt-4 mb-2">Bank Details</h5>
+              </Col>
+
+              <Col md={6}>
+                <FloatingLabel controlId="accountNumber" label="Account Number">
+                  <Form.Control
+                    type="text"
+                    name="accountNumber"
+                    value={form.accountNumber}
+                    onChange={handleChange}
+                    required
+                  />
+                </FloatingLabel>
+              </Col>
+
+              <Col md={6}>
+                <FloatingLabel controlId="ifscCode" label="IFSC Code">
+                  <Form.Control
+                    type="text"
+                    name="ifscCode"
+                    value={form.ifscCode}
+                    onChange={handleChange}
+                    required
+                  />
+                </FloatingLabel>
+              </Col>
+
+              <Col md={12}>
+                <FloatingLabel controlId="bankName" label="Bank Name">
+                  <Form.Control
+                    type="text"
+                    name="bankName"
+                    value={form.bankName}
+                    onChange={handleChange}
+                    required
+                  />
+                </FloatingLabel>
               </Col>
             </Row>
 
-            <div className="text-end">
-              <Button variant="primary" type="submit">
+            <div className="text-end mt-4">
+              <Button
+                variant="primary"
+                type="submit"
+                className="px-5 py-2 rounded-pill shadow-sm"
+              >
                 Add Employee
               </Button>
             </div>
