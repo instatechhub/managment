@@ -66,7 +66,7 @@ const AttendanceForm = () => {
     <Container className="py-4">
       {/* Header */}
       <div className="text-center mb-4">
-        <h3 className="fw-bold">📅 Daily Attendance</h3>
+        <h3 className="fw-bold">Daily Attendance</h3>
         <p className="text-muted mb-2">
           Mark today's attendance for your team members with just a few clicks.
         </p>

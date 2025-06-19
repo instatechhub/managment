@@ -32,7 +32,7 @@ const ViewAttendance = () => {
 
   return (
     <Container className="mt-4">
-      <h3 className="fw-bold text-center mb-4">📅 Employee Attendance Overview</h3>
+      <h3 className="fw-bold text-center mb-4">Employee Attendance Overview</h3>
 
       <div className="d-flex justify-content-center mb-4">
         <input

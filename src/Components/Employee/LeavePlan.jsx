@@ -23,7 +23,7 @@ const LeavePlan = () => {
   const [leaveReason, setLeaveReason] = useState('');
   const [leaveType, setLeaveType] = useState('Full Day');
 
-  const currentMonth = dayjs().month(); // 0-11
+  const currentMonth = dayjs().month(); 
   const currentYear = dayjs().year();
 
   const [month, setMonth] = useState(currentMonth);
@@ -34,7 +34,7 @@ const LeavePlan = () => {
     'July', 'August', 'September', 'October', 'November', 'December'
   ];
 
-  const years = Array.from({ length: 5 }, (_, i) => currentYear - 2 + i);
+  const years = Array.from({ length: 12 }, (_, i) => currentYear - 1 + i);
 
   const getDaysInMonth = (year, month) => {
     const days = [];
@@ -97,7 +97,7 @@ const LeavePlan = () => {
 
   return (
     <div className="p-4">
-      <h4 className="mb-4 fw-bold">🗓️ Leave Planning</h4>
+      <h4 className="mb-4 fw-bold">Leave Planning</h4>
 
       <Row>
         <Col md={4}>
