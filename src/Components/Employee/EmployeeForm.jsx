@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   Container,
   Row,
@@ -7,23 +7,26 @@ import {
   Form,
   FloatingLabel,
   Button,
-} from 'react-bootstrap';
-import useAuthStore from '../../Store/AuthStore/AuthStore';
+} from "react-bootstrap";
+import useAuthStore from "../../Store/AuthStore/AuthStore";
+import useManagerStore from "../../Store/AuthStore/ManagerStore";
+import { toast } from "react-toastify";
 
 const EmployeeForm = () => {
-  const {user} = useAuthStore();
+  const { user } = useAuthStore();
+  const { addEmployees } = useManagerStore();
   const [form, setForm] = useState({
-    name: '',
-    contact: '',
-    joining: '',
+    name: "",
+    contact: "",
+    joining: "",
     process: user?.processName,
-    salary: '',
-    designation: '',
-    gender: '',
-    status: 'Active',
-    accountNumber: '',
-    ifscCode: '',
-    bankName: '',
+    salary: "",
+    designation: "",
+    gender: "",
+    status: "active",
+    accountNumber: "",
+    ifscCode: "",
+    bankName: "",
   });
 
   const handleChange = (e) => {
@@ -31,11 +34,47 @@ const EmployeeForm = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log(form);
-    alert('Employee added successfully!');
-  };
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await addEmployees({
+      managerId: user._id,
+      name: form.name,
+      number: form.contact,
+      joiningDate: form.joining,
+      processName: form.process,
+      salary: form.salary,
+      designation: form.designation,
+      gender: form.gender,
+      status: form.status,
+      accountNumber: form.accountNumber,
+      ifscCode: form.ifscCode,
+      bankName: form.bankName,
+    });
+
+    if (response?.data?.success) {
+      toast.success("Employee added successfully!");
+      setForm({
+        name: "",
+        contact: "",
+        joining: "",
+        process: "",
+        salary: "",
+        designation: "",
+        gender: "",
+        status: "",
+        accountNumber: "",
+        ifscCode: "",
+        bankName: "",
+      });
+    } else {
+      toast.error(response?.data?.message || "Failed to add employee.");
+    }
+  } catch (error) {
+    console.error("Error while adding employee:", error);
+    toast.error("Something went wrong. Please try again.");
+  }
+};
 
   return (
     <Container className="py-4">
@@ -141,8 +180,8 @@ const EmployeeForm = () => {
                     value={form.status}
                     onChange={handleChange}
                   >
-                    <option>Active</option>
-                    <option>Inactive</option>
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
                   </Form.Select>
                 </FloatingLabel>
               </Col>

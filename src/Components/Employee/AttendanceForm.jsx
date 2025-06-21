@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Container,
   Row,
@@ -9,14 +9,8 @@ import {
   ButtonGroup,
 } from 'react-bootstrap';
 import { BsPersonCheckFill, BsPersonXFill, BsClockFill, BsHouse, BsBriefcase } from 'react-icons/bs';
-
-const employees = [
-  { id: 'EMP001', name: 'Ravi Kumar' },
-  { id: 'EMP002', name: 'Anjali Sharma' },
-  { id: 'EMP003', name: 'Aman Verma' },
-  { id: 'EMP004', name: 'Sneha Mehta' },
-  { id: 'EMP005', name: 'Rohit Singh' },
-];
+import useManagerStore from '../../Store/AuthStore/ManagerStore';
+import useAuthStore from '../../Store/AuthStore/AuthStore';
 
 const attendanceOptions = [
   { label: 'Present', icon: <BsPersonCheckFill className="me-2 text-success" /> },
@@ -27,14 +21,30 @@ const attendanceOptions = [
 ];
 
 const AttendanceForm = () => {
+  const {getActiveEmployees,activeEmployees} = useManagerStore();
+  const {user} = useAuthStore();
   const today = new Date().toISOString().split('T')[0];
   const [selectedDate, setSelectedDate] = useState(today);
+
   const [attendance, setAttendance] = useState(
-    employees.reduce((acc, emp) => {
-      acc[emp.id] = 'Present';
+    activeEmployees?.reduce((acc, emp) => {
+      acc[emp?._id] = 'Present';
       return acc;
     }, {})
   );
+
+  useEffect(()=>{
+    if(user){
+    const fetchData = async()=>{
+      const response = await getActiveEmployees(user?._id);
+
+      console.log(response, "lkklklk");
+    }
+    fetchData();
+    }
+  },[])
+
+  console.log(activeEmployees)
 
   const changeStatus = (empId, status) => {
     setAttendance((prev) => ({ ...prev, [empId]: status }));
@@ -89,22 +99,22 @@ const AttendanceForm = () => {
 
       {/* Employee Cards */}
       <Row className="g-4 mt-3">
-        {employees.map((emp) => (
-          <Col xs={12} sm={6} md={4} lg={3} key={emp.id}>
+        {activeEmployees && activeEmployees?.map((emp) => (
+          <Col xs={12} sm={6} md={4} lg={3} key={emp._id}>
             <Card className="h-100 shadow-sm border-0 rounded-4">
               <Card.Body className="d-flex flex-column justify-content-between">
                 <div>
-                  <h6 className="fw-semibold">{emp.name}</h6>
-                  <div className="text-muted small">{emp.id}</div>
+                  <h6 className="fw-semibold">{emp.name.toUpperCase()}</h6>
+                  <div className="text-muted small">{emp._id}</div>
                 </div>
 
                 <div className="mt-3">
                   <Dropdown as={ButtonGroup}>
                     <Button
-                      variant={getStatusVariant(attendance[emp.id])}
+                      variant={getStatusVariant(attendance[emp._id])}
                       className="rounded-pill"
                     >
-                      {attendance[emp.id]}
+                      {attendance[emp._id]}
                     </Button>
                     <Dropdown.Toggle
                       split
@@ -115,7 +125,7 @@ const AttendanceForm = () => {
                       {attendanceOptions.map((option) => (
                         <Dropdown.Item
                           key={option.label}
-                          onClick={() => changeStatus(emp.id, option.label)}
+                          onClick={() => changeStatus(emp._id, option.label)}
                         >
                           {option.icon}
                           {option.label}

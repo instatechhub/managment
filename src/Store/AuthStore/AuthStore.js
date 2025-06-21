@@ -23,7 +23,6 @@ login: async (payload) => {
       set({ isLoading: false });
     }
   },
-
 getManager: async () => {
     set({ isLoading: true, error: null });
     try {
@@ -51,7 +50,6 @@ getManager: async () => {
       set({ isLoading: false });
     }
   },
-
 logout: async()=>{
    set({user: null,});
    localStorage.removeItem('token')
