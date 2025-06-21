@@ -1,20 +1,48 @@
-import React, { useState } from "react";
-import "./Login.css"; 
+import React, { useState,useCallback,useEffect } from "react";
+import "./Login.css";
+import useAuthStore from "../../Store/AuthStore/AuthStore";
+import { toast } from 'react-toastify';
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("rishi@gmail.com");
+  const [password, setPassword] = useState("123456");
+  const {login,user} = useAuthStore();
+  const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log("Logging in with:", { email, password });
-  };
+  const handleRedirect = useCallback(() => {
+    if (token && user) {
+      navigate("/dashboard");
+    } else {
+      navigate("/");
+    }
+  }, [token, user, navigate]);
 
+  useEffect(() => {
+    handleRedirect();
+  }, [handleRedirect]);
+
+const handleLogin = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await login({ input:email, password:password });
+    console.log("Login response:", response.data);
+    if(response?.data?.success){
+    toast.success("Login Successful!");
+    navigate("/dashboard");
+    localStorage.setItem("token",response?.data?.token)
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    const message = error?.response?.data?.message || "Login failed. Please try again.";
+    toast.error(message);
+  }
+};
   return (
     <div className="d-flex align-items-center justify-content-center vh-100 bg-light login-wrapper">
       <div className="card shadow-lg border-0 rounded-4 overflow-hidden w-100" style={{ maxWidth: "900px" }}>
         <div className="row g-0">
-          {/* Left Image and Info Section */}
           <div className="col-md-6 bg-danger-subtle d-flex flex-column justify-content-center align-items-center p-4 animate-slide-in-left">
             <img
               src={require("../../Assests/02.png")}
@@ -22,13 +50,11 @@ const Login = () => {
               className="img-fluid mb-4"
               style={{ maxHeight: "500px" }}
             />
-            {/* <h2 className="fw-bold text-dark mb-2">Manager Login</h2> */}
 <p className="text-muted px-3 text-center">
   Streamline employee attendance, boost productivity, and simplify workforce tracking with Insta Connects.
 </p>
           </div>
 
-          {/* Right Login Form Section */}
           <div className="col-md-6 p-5 animate-slide-in-right">
             <h3 className="mb-4">
               <strong>Insta</strong>{" "}
@@ -66,9 +92,7 @@ const Login = () => {
               </div>
 
               <button type="submit" className="btn btn-dark w-100 mt-3">
-                <a href="/dashboard" className="text-decoration-none text-white ">
                 Sign in
-                </a>
               </button>
             </form>
           </div>

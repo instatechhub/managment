@@ -8,13 +8,15 @@ import {
   FloatingLabel,
   Button,
 } from 'react-bootstrap';
+import useAuthStore from '../../Store/AuthStore/AuthStore';
 
 const EmployeeForm = () => {
+  const {user} = useAuthStore();
   const [form, setForm] = useState({
     name: '',
     contact: '',
     joining: '',
-    process: '',
+    process: user?.processName,
     salary: '',
     designation: '',
     gender: '',
@@ -89,6 +91,7 @@ const EmployeeForm = () => {
                     name="process"
                     value={form.process}
                     onChange={handleChange}
+                    disabled
                   />
                 </FloatingLabel>
               </Col>

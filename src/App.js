@@ -1,21 +1,37 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route,useLocation } from "react-router-dom";
-import Sidebar from './Components/Sidebar/Sidebar';
-import AppRoutes from './Routes/AppRoutes';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './custom.css';
+import React, { useState, useEffect, useRef,useCallback } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import Sidebar from "./Components/Sidebar/Sidebar";
+import AppRoutes from "./Routes/AppRoutes";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./custom.css";
 import { CgMenuGridO } from "react-icons/cg";
 import { IoCloseCircleOutline } from "react-icons/io5";
-import Login from './Components/Login/Login';
+import Login from "./Components/Login/Login";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import useAuthStore from "./Store/AuthStore/AuthStore";
 
 function AppWrapper() {
   return (
-    <Router>
-      <Routes>
-      <Route path="/" element={<Login />} />
-      <Route path="/*" element={<App />} />
-    </Routes>
-    </Router>
+    <>
+      <Router>
+        <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/*" element={<App />} />
+        </Routes>
+      </Router>
+      <ToastContainer
+        position="top-center"
+        hideProgressBar={true}
+        theme="colored"
+      />
+    </>
   );
 }
 
@@ -23,6 +39,36 @@ function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const sidebarRef = useRef(null);
   const location = useLocation();
+
+  const { user,getManager } = useAuthStore();
+  const token = localStorage.getItem("token");
+  const navigate = useNavigate();
+
+  const fetchUser = useCallback(async () => {
+    try {
+      if (token) {
+       await getManager();
+      } else {
+        navigate("/");
+        localStorage.removeItem('token');
+      }
+    } catch (error) {
+      console.error("Failed to fetch user:", error);
+      navigate("/");
+      localStorage.removeItem('token')
+    }
+  }, [token, navigate]);
+
+    useEffect(() => {
+    fetchUser();
+  }, [fetchUser]);
+
+  useEffect(() => {
+    if (!token || !user) {
+      navigate("/");
+    }
+  }, [token, user, navigate]);
+
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -33,14 +79,14 @@ function App() {
       if (
         sidebarRef.current &&
         !sidebarRef.current.contains(event.target) &&
-        !event.target.closest('.menu-icon')
+        !event.target.closest(".menu-icon")
       ) {
         setSidebarOpen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -55,7 +101,7 @@ function App() {
 
       <div
         ref={sidebarRef}
-        className={`sidebar-fixed ${sidebarOpen ? 'open' : ''}`}
+        className={`sidebar-fixed ${sidebarOpen ? "open" : ""}`}
       >
         <Sidebar />
         <div className="close-icon d-md-none" onClick={toggleSidebar}>
