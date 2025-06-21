@@ -10,6 +10,8 @@ import {
   FaUsers
 } from 'react-icons/fa';
 
+import logo from '../../Assests/newLogo.png'
+
 const Sidebar = () => {
   const navigate = useNavigate();
 
@@ -37,9 +39,8 @@ const Sidebar = () => {
         top: 0,
       }}
     >
-      <h4 className="mb-4 text-center">Manager Panel</h4>
-
-      <ul className="nav nav-pills flex-column gap-2 flex-grow-1">
+        <img src={logo} alt="logo" />
+      <ul className="nav nav-pills flex-column gap-2 flex-grow-1 mt-2">
         {links.map((link, index) => (
           <li className="nav-item" key={index}>
             <NavLink
