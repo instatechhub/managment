@@ -57,27 +57,27 @@ const EmployeeData = () => {
             <h6 className="fw-bold mb-3">Employee Info</h6>
             <p>
               <FaPhoneAlt className="me-2 text-muted" />{" "}
-              <strong>Contact:</strong> {OneEmployee?.number}
+              <strong>Contact:</strong> {OneEmployee?.number || "NA"}
             </p>
             <p>
               <FaCalendarAlt className="me-2 text-muted" />{" "}
-              <strong>Joining Date:</strong> {OneEmployee?.joiningDate}
+              <strong>Joining Date:</strong> {OneEmployee?.joiningDate || "NA"}
             </p>
             <p>
               <FaBuilding className="me-2 text-muted" />{" "}
-              <strong>Process:</strong> {OneEmployee?.processName?.toUpperCase()}
+              <strong>Process:</strong> {OneEmployee?.processName?.toUpperCase() || "NA"}
             </p>
             <p>
               <FaMoneyBillWave className="me-2 text-muted" />{" "}
-              <strong>Salary:</strong> ₹{OneEmployee?.salary}
+              <strong>Salary:</strong> ₹{OneEmployee?.salary || "NA"}
             </p>
             <p>
               <FaVenusMars className="me-2 text-muted" />{" "}
-              <strong>Gender:</strong> {OneEmployee?.gender?.toUpperCase()}
+              <strong>Gender:</strong> {OneEmployee?.gender?.toUpperCase() || "NA"}
             </p>
             <p>
               <FaCheckCircle className="me-2 text-muted" />{" "}
-              <strong>Status:</strong> {OneEmployee?.status?.toUpperCase()}
+              <strong>Status:</strong> {OneEmployee?.status?.toUpperCase() || "NA"}
             </p>
           </Col>
 
@@ -85,15 +85,15 @@ const EmployeeData = () => {
             <h6 className="fw-bold mb-3">Bank Details</h6>
             <p>
               <FaUniversity className="me-2 text-muted" />{" "}
-              <strong>Bank:</strong> {OneEmployee?.bankName?.toUpperCase()}
+              <strong>Bank:</strong> {OneEmployee?.bankName?.toUpperCase() || "NA"}
             </p>
             <p>
               <FaHashtag className="me-2 text-muted" />{" "}
-              <strong>IFSC Code:</strong> {OneEmployee?.ifscCode}
+              <strong>IFSC Code:</strong> {OneEmployee?.ifscCode || "NA"}
             </p>
             <p>
               <FaIdCard className="me-2 text-muted" />{" "}
-              <strong>Account No:</strong> {OneEmployee?.accountNumber}
+              <strong>Account No:</strong> {OneEmployee?.accountNumber || "NA"}
             </p>
           </Col>
         </Row>

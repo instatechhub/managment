@@ -1,34 +1,57 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card } from 'react-bootstrap';
 import { FaUserCircle } from 'react-icons/fa';
-
-const employees = [
-  { id: 1, name: 'Ravi Kumar', month: '2025-06', presentCount: 20 },
-  { id: 2, name: 'Anjali Sharma', month: '2025-06', presentCount: 18 },
-  { id: 3, name: 'Mohit Sinha', month: '2025-06', presentCount: 22 },
-  { id: 1, name: 'Ravi Kumar', month: '2025-05', presentCount: 21 },
-  { id: 2, name: 'Anjali Sharma', month: '2025-05', presentCount: 19 },
-  { id: 3, name: 'Mohit Sinha', month: '2025-05', presentCount: 20 },
-];
+import useManagerStore from '../../Store/AuthStore/ManagerStore';
+import useAuthStore from '../../Store/AuthStore/AuthStore';
 
 const ViewAttendance = () => {
+  const { viewAttendanceList } = useManagerStore();
+  const { user } = useAuthStore();
   const navigate = useNavigate();
-  const today = new Date();
-  const maxMonth = today.toISOString().slice(0, 7);
+
+  const today = useMemo(() => new Date(), []);
+  const maxMonth = useMemo(() => today.toISOString().slice(0, 7), [today]);
   const [selectedMonth, setSelectedMonth] = useState(maxMonth);
+  const [attendanceData, setAttendanceData] = useState([]);
 
-  const filteredEmployees = employees.filter(emp => emp.month === selectedMonth);
+  const fetchAttendanceData = useCallback(async () => {
+    if (!user?._id || !selectedMonth) return;
+    const [year, month] = selectedMonth.split('-');
+    try {
+      const response = await viewAttendanceList({
+        managerId: user._id,
+        month: parseInt(month),
+        year: parseInt(year),
+      });
+      setAttendanceData(response);
+    } catch (error) {
+      console.error("Failed to fetch attendance data:", error);
+    }
+  }, [user?._id, selectedMonth, viewAttendanceList]);
 
-  const handleClick = (id) => {
+  useEffect(() => {
+    fetchAttendanceData();
+  }, [fetchAttendanceData]);
+
+  const handleCardClick = useCallback((id) => {
     navigate(`/employee-attendance/${id}`);
-  };
+  }, [navigate]);
 
-  const displayMonth = (monthStr) => {
+  const displayMonth = useCallback((monthStr) => {
     const [year, month] = monthStr.split('-');
     const date = new Date(year, month - 1);
     return date.toLocaleString('default', { month: 'long', year: 'numeric' });
-  };
+  }, []);
+
+  const filteredEmployees = useMemo(() => {
+    return attendanceData.map((emp) => ({
+      id: emp.employeeId,
+      name: emp.name,
+      month: `${emp.year}-${String(emp.month).padStart(2, '0')}`,
+      presentCount: emp.presentDays
+    })).filter(emp => emp.month === selectedMonth);
+  }, [attendanceData, selectedMonth]);
 
   return (
     <Container className="mt-4">
@@ -46,14 +69,15 @@ const ViewAttendance = () => {
       </div>
 
       {filteredEmployees.length === 0 ? (
-        <p className="text-center text-muted">No attendance records found for {displayMonth(selectedMonth)}</p>
+        <p className="text-center text-muted">
+          No attendance records found for {displayMonth(selectedMonth)}
+        </p>
       ) : (
         <Row className="g-4">
           {filteredEmployees.map((emp) => (
             <Col xs={12} md={6} lg={4} key={`${emp.id}-${emp.month}`}>
               <Card
-              
-                onClick={() => handleClick(emp.id)}
+                onClick={() => handleCardClick(emp.id)}
                 className="border-1 shadow-sm rounded-4 attendance-card h-100"
                 style={{ cursor: 'pointer', transition: 'transform 0.3s ease-in-out' }}
                 onMouseEnter={e => (e.currentTarget.style.transform = 'scale(1.02)')}

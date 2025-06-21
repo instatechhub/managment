@@ -5,8 +5,8 @@ const useManagerStore = create((set) => ({
   isLoading: false,
   error: null,
   employees: [],
-  OneEmployee:{},
-  activeEmployees:[],
+  OneEmployee: {},
+  activeEmployees: [],
 
   addEmployees: async (payload) => {
     set({ loading: true, error: null });
@@ -15,46 +15,74 @@ const useManagerStore = create((set) => ({
       return response;
     } catch (error) {
       set({ error: error.message, loading: false });
-      throw error
+      throw error;
     }
   },
 
-  getEmployees: async(managerId) =>{
-      set({ loading: true, error: null });
+  getEmployees: async (managerId) => {
+    set({ loading: true, error: null });
     try {
-      const response = await api.get(`/manager/getEmployeesByManager/${managerId}`);
-         set({ employees: response?.data?.data, loading: false });
+      const response = await api.get(
+        `/manager/getEmployeesByManager/${managerId}`
+      );
+      set({ employees: response?.data?.data, loading: false });
       return response;
     } catch (error) {
       set({ error: error.message, loading: false });
-      throw error
+      throw error;
     }
   },
-getEmployeeData: async(employeeId) =>{
-      set({ loading: true, error: null });
+  getEmployeeData: async (employeeId) => {
+    set({ loading: true, error: null });
     try {
       const response = await api.get(`/manager/getEmployeeData/${employeeId}`);
 
-      console.log(response, "store")
-         set({ OneEmployee: response?.data?.data, loading: false });
+      console.log(response, "store");
+      set({ OneEmployee: response?.data?.data, loading: false });
       return response;
     } catch (error) {
       set({ error: error.message, loading: false });
-      throw error
+      throw error;
     }
   },
 
-getActiveEmployees: async(managerId) =>{
-      set({ loading: true, error: null });
+  getActiveEmployees: async (managerId) => {
+    set({ loading: true, error: null });
     try {
-      const response = await api.get(`/manager/getActiveEmployees/${managerId}`);
-         set({ activeEmployees: response?.data?.data, loading: false });
+      const response = await api.get(
+        `/manager/getActiveEmployees/${managerId}`
+      );
+      set({ activeEmployees: response?.data?.data, loading: false });
       return response;
     } catch (error) {
       set({ error: error.message, loading: false });
-      throw error
+      throw error;
     }
+  },
+
+  markedAttendance: async (payload) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post("/manager/attandanceMarked", payload);
+      return response;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
+viewAttendanceList: async ({ managerId, month, year }) => {
+  set({ loading: true, error: null });
+  try {
+    const response = await api.get("/manager/viewAttendance", {
+      params: { managerId, month, year }
+    });
+    return response.data;
+  } catch (error) {
+    set({ error: error.message, loading: false });
+    throw error;
   }
+}
 
 }));
 

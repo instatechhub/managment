@@ -1,4 +1,4 @@
-import React, { use, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Row, Col, Badge } from 'react-bootstrap';
 import { FaUserTie } from 'react-icons/fa';

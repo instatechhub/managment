@@ -15,11 +15,14 @@ import { toast } from "react-toastify";
 const EmployeeForm = () => {
   const { user } = useAuthStore();
   const { addEmployees } = useManagerStore();
+
+  const [loading, setLoading] = useState(false);
+
   const [form, setForm] = useState({
     name: "",
     contact: "",
     joining: "",
-    process: user?.processName,
+    process: user?.processName || "", 
     salary: "",
     designation: "",
     gender: "",
@@ -34,47 +37,67 @@ const EmployeeForm = () => {
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await addEmployees({
-      managerId: user._id,
-      name: form.name,
-      number: form.contact,
-      joiningDate: form.joining,
-      processName: form.process,
-      salary: form.salary,
-      designation: form.designation,
-      gender: form.gender,
-      status: form.status,
-      accountNumber: form.accountNumber,
-      ifscCode: form.ifscCode,
-      bankName: form.bankName,
-    });
+  const validateForm = () => {
+    if (!form.name.trim()) return "Name is required.";
+    if (!form.joining) return "Joining date is required.";
+    if (!form.process) return "Process name is missing.";
+    if (!form.gender) return "Gender is required.";
+    if (!form.salary) return "Salary is required.";
 
-    if (response?.data?.success) {
-      toast.success("Employee added successfully!");
-      setForm({
-        name: "",
-        contact: "",
-        joining: "",
-        process: "",
-        salary: "",
-        designation: "",
-        gender: "",
-        status: "",
-        accountNumber: "",
-        ifscCode: "",
-        bankName: "",
-      });
-    } else {
-      toast.error(response?.data?.message || "Failed to add employee.");
+   
+    return null;
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const error = validateForm();
+    if (error) {
+      toast.error(error);
+      return;
     }
-  } catch (error) {
-    console.error("Error while adding employee:", error);
-    toast.error("Something went wrong. Please try again.");
-  }
-};
+
+    setLoading(true);
+    try {
+      const response = await addEmployees({
+        managerId: user._id,
+        name: form.name,
+        number: form.contact,
+        joiningDate: form.joining,
+        processName: form.process,
+        salary: form.salary,
+        designation: form.designation,
+        gender: form.gender,
+        status: form.status,
+        accountNumber: form.accountNumber,
+        ifscCode: form.ifscCode,
+        bankName: form.bankName,
+      });
+
+      if (response?.data?.success) {
+        toast.success("Employee added successfully!");
+        setForm({
+          name: "",
+          contact: "",
+          joining: "",
+          process: user?.processName || "",
+          salary: "",
+          designation: "",
+          gender: "",
+          status: "active",
+          accountNumber: "",
+          ifscCode: "",
+          bankName: "",
+        });
+      } else {
+        toast.error(response?.data?.message || "Failed to add employee.");
+      }
+    } catch (error) {
+      console.error("Error while adding employee:", error);
+      toast.error("Server error. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Container className="py-4">
@@ -153,6 +176,7 @@ const handleSubmit = async (e) => {
                     name="salary"
                     value={form.salary}
                     onChange={handleChange}
+                     required
                   />
                 </FloatingLabel>
               </Col>
@@ -198,7 +222,7 @@ const handleSubmit = async (e) => {
                     name="accountNumber"
                     value={form.accountNumber}
                     onChange={handleChange}
-                    required
+               
                   />
                 </FloatingLabel>
               </Col>
@@ -210,7 +234,7 @@ const handleSubmit = async (e) => {
                     name="ifscCode"
                     value={form.ifscCode}
                     onChange={handleChange}
-                    required
+               
                   />
                 </FloatingLabel>
               </Col>
@@ -222,7 +246,7 @@ const handleSubmit = async (e) => {
                     name="bankName"
                     value={form.bankName}
                     onChange={handleChange}
-                    required
+              
                   />
                 </FloatingLabel>
               </Col>
@@ -232,9 +256,21 @@ const handleSubmit = async (e) => {
               <Button
                 variant="primary"
                 type="submit"
-                className="px-5 py-2 rounded-pill shadow-sm"
+                disabled={loading}
+                className="px-5 py-2 rounded-pill shadow-sm d-flex align-items-center justify-content-center"
               >
-                Add Employee
+                {loading ? (
+                  <>
+                    <span
+                      className="spinner-border spinner-border-sm me-2"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                    Adding...
+                  </>
+                ) : (
+                  "Add Employee"
+                )}
               </Button>
             </div>
           </Form>
