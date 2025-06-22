@@ -158,7 +158,7 @@ const ViewReport = () => {
 
               return (
                 <tr key={idx}>
-                  <td>{emp.name}</td>
+                  <td>{emp.name?.toUpperCase()}</td>
                   <td>
                     <Form.Control
                       type="number"
