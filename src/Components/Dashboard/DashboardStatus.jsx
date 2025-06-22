@@ -28,7 +28,7 @@ const iconMap = {
   "Half Day": <FaUserClock />,
 };
 
-const DashboardStats = ({ managerId }) => {
+const DashboardStats = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [stats, setStats] = useState([]);
   const [todayEmployees, setTodayEmployees] = useState([]);
