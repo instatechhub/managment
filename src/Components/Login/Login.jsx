@@ -3,10 +3,10 @@ import "./Login.css";
 import useAuthStore from "../../Store/AuthStore/AuthStore";
 import { toast } from 'react-toastify';
 import { useNavigate } from "react-router-dom";
-import Spinner from 'react-bootstrap/Spinner'; // Add Bootstrap Spinner (optional)
+import Spinner from 'react-bootstrap/Spinner'; 
 
 const Login = () => {
-  const [email, setEmail] = useState(""); // Remove hardcoded values for prod
+  const [email, setEmail] = useState(""); 
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   
@@ -60,6 +60,10 @@ const Login = () => {
     }
   };
 
+  const handleForgetPassword = async()=>{
+    toast.info("Please Contanct to Your Admin")
+  }
+
   return (
     <div className="d-flex align-items-center justify-content-center vh-100 bg-light login-wrapper">
       <div className="card shadow-lg border-0 rounded-4 overflow-hidden w-100" style={{ maxWidth: "900px" }}>
@@ -110,7 +114,7 @@ const Login = () => {
                   required
                   aria-required="true"
                 />
-                <div className="text-end mt-1">
+                <div className="text-end mt-1" onClick={handleForgetPassword}>
                   <a href="#" className="text-decoration-none custom-dark-blue small">
                     Forgot password?
                   </a>
