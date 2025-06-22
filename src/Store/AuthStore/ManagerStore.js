@@ -82,7 +82,64 @@ viewAttendanceList: async ({ managerId, month, year }) => {
     set({ error: error.message, loading: false });
     throw error;
   }
-}
+},
+
+viewSingleAttendance: async ({ employeeId, month, year }) => {
+  console.log(employeeId, month, year)
+  set({ loading: true, error: null });
+  try {
+    const response = await api.get(`/manager/viewEmployeeAttendance/${employeeId}`, {
+      params: { month, year }
+    });
+    return response.data;
+  } catch (error) {
+    set({ error: error.message, loading: false });
+    throw error;
+  }
+},
+
+employeeLeavePlan: async (payload) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.post("/manager/leavePlane/", payload);
+      return response;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
+  getLeavePlan: async(employeeId,month,year) =>{
+       set({ loading: true, error: null });
+    try {
+      const response = await api.get(`/manager/getleavePlan/${employeeId}`,{
+        params: {
+        month: Number(month),
+        year: Number(year),
+      },
+      });
+      set({loading: false });
+      return response;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  },
+
+getAttandanceTrack: async(managerId) =>{
+       set({ loading: true, error: null });
+    try {
+      const response = await api.get(`/manager/attendanceTrack/${managerId}`);
+      set({loading: false });
+      return response;
+    } catch (error) {
+      set({ error: error.message, loading: false });
+      throw error;
+    }
+  }
+
+
+
 
 }));
 

@@ -1,99 +1,157 @@
-import React, { useState } from 'react';
-import { Card, Row, Col, ListGroup, Modal, Button, Form } from 'react-bootstrap';
-import dayjs from 'dayjs';
-
-const employees = [
-  { id: 1, name: 'Alice Johnson' },
-  { id: 2, name: 'Bob Smith' },
-  { id: 3, name: 'Charlie Davis' },
-];
+import React, { useEffect, useState, useMemo, useCallback } from "react";
+import {
+  Card,
+  Row,
+  Col,
+  ListGroup,
+  Modal,
+  Button,
+  Form,
+} from "react-bootstrap";
+import dayjs from "dayjs";
+import useManagerStore from "../../Store/AuthStore/ManagerStore";
+import { toast } from "react-toastify";
+import useAuthStore from "../../Store/AuthStore/AuthStore";
 
 const leaveTypes = [
-  'Full Day',
-  'Half Day',
-  'Emergency Full Day',
-  'Emergency Half Day'
+  "Full Day",
+  "Half Day",
+  "Emergency Full Day",
+  "Emergency Half Day",
 ];
 
 const LeavePlan = () => {
   const [selectedEmployee, setSelectedEmployee] = useState(null);
   const [leaveData, setLeaveData] = useState({});
   const [showModal, setShowModal] = useState(false);
-  const [selectedDate, setSelectedDate] = useState('');
-  const [leaveReason, setLeaveReason] = useState('');
-  const [leaveType, setLeaveType] = useState('Full Day');
+  const [selectedDate, setSelectedDate] = useState("");
+  const [leaveReason, setLeaveReason] = useState("");
+  const [leaveType, setLeaveType] = useState("Full Day");
 
-  const currentMonth = dayjs().month(); 
+  const { employees, getEmployees, employeeLeavePlan, getLeavePlan } = useManagerStore();
+  const { user } = useAuthStore();
+
+  const currentMonth = dayjs().month();
   const currentYear = dayjs().year();
 
   const [month, setMonth] = useState(currentMonth);
   const [year, setYear] = useState(currentYear);
 
   const months = [
-    'January', 'February', 'March', 'April', 'May', 'June',
-    'July', 'August', 'September', 'October', 'November', 'December'
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
   ];
 
-  const years = Array.from({ length: 12 }, (_, i) => currentYear - 1 + i);
+  const years = useMemo(() => Array.from({ length: 12 }, (_, i) => currentYear - 1 + i), [currentYear]);
 
-  const getDaysInMonth = (year, month) => {
-    const days = [];
+  const getDaysInMonth = useCallback((year, month) => {
     const totalDays = dayjs(`${year}-${month + 1}-01`).daysInMonth();
+    return Array.from({ length: totalDays }, (_, i) =>
+      dayjs(`${year}-${month + 1}-${i + 1}`).format("YYYY-MM-DD")
+    );
+  }, []);
 
-    for (let i = 1; i <= totalDays; i++) {
-      days.push(dayjs(`${year}-${month + 1}-${i}`).format('YYYY-MM-DD'));
+  const days = useMemo(() => getDaysInMonth(year, month), [getDaysInMonth, month, year]);
+
+  useEffect(() => {
+    if (user) {
+      getEmployees(user._id);
+    }
+  }, [user, getEmployees]);
+
+  useEffect(() => {
+    const fetchLeavePlan = async () => {
+      if (!selectedEmployee) return;
+      try {
+        const data = await getLeavePlan(selectedEmployee._id, Number(month), Number(year));
+        if (data?.data?.success) {
+          const leaveMap = {};
+          data.data.leaves.forEach((leave) => {
+            leaveMap[dayjs(leave.date).format("YYYY-MM-DD")] = {
+              type: leave.type,
+              reason: leave.reason,
+            };
+          });
+
+          setLeaveData((prev) => ({
+            ...prev,
+            [selectedEmployee._id]: leaveMap,
+          }));
+        } else {
+          toast.error("Failed to load leave plan.");
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Error loading leave data.");
+      }
+    };
+
+    fetchLeavePlan();
+  }, [selectedEmployee, month, year, getLeavePlan]);
+
+  const handleDayClick = useCallback((date) => {
+    const today = dayjs().startOf("day");
+    const clickedDate = dayjs(date).startOf("day");
+
+    if (clickedDate.isBefore(today)) {
+      toast.info("You can only plan leaves for today or future dates.");
+      return;
     }
 
-    return days;
-  };
-
-  const handleDayClick = (date) => {
     setSelectedDate(date);
-    const existing = leaveData[selectedEmployee?.id]?.[date];
-    setLeaveType(existing?.type || 'Full Day');
-    setLeaveReason(existing?.reason || '');
+    const existing = leaveData[selectedEmployee?._id]?.[date];
+    setLeaveType(existing?.type || "Full Day");
+    setLeaveReason(existing?.reason || "");
     setShowModal(true);
-  };
+  }, [leaveData, selectedEmployee]);
 
-  const handleSaveLeave = () => {
-    setLeaveData((prev) => {
-      const empLeaves = { ...(prev[selectedEmployee.id] || {}) };
-      empLeaves[selectedDate] = {
+  const handleSaveLeave = useCallback(async () => {
+    try {
+      const response = await employeeLeavePlan({
+        employeeId: selectedEmployee._id,
+        date: selectedDate,
         type: leaveType,
-        reason: leaveReason
-      };
+        reason: leaveReason,
+      });
 
-      return {
-        ...prev,
-        [selectedEmployee.id]: empLeaves,
-      };
-    });
+      if (response?.data?.success) {
+        setLeaveData((prev) => {
+          const empLeaves = { ...(prev[selectedEmployee._id] || {}) };
+          empLeaves[selectedDate] = { type: leaveType, reason: leaveReason };
+          return { ...prev, [selectedEmployee._id]: empLeaves };
+        });
 
-    setShowModal(false);
-    setLeaveReason('');
-    setLeaveType('Full Day');
-    setSelectedDate('');
-  };
+        toast.success("Leave saved successfully!");
+        setShowModal(false);
+        setLeaveReason("");
+        setLeaveType("Full Day");
+        setSelectedDate("");
+      } else {
+        toast.error("Failed to save leave.");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Error while saving leave.");
+    }
+  }, [employeeLeavePlan, selectedEmployee, selectedDate, leaveType, leaveReason]);
 
-  const getLeaveTypeClass = (date) => {
-    const leave = leaveData[selectedEmployee?.id]?.[date];
-    if (!leave) return 'bg-light';
+  const getLeaveTypeClass = useCallback((date) => {
+    const leave = leaveData[selectedEmployee?._id]?.[date];
+    if (!leave) return "bg-light";
 
     switch (leave.type) {
-      case 'Full Day':
-        return 'bg-warning text-dark';
-      case 'Half Day':
-        return 'bg-info text-dark';
-      case 'Emergency Full Day':
-        return 'bg-danger text-white';
-      case 'Emergency Half Day':
-        return 'bg-secondary text-white';
+      case "Full Day":
+        return "bg-warning text-dark";
+      case "Half Day":
+        return "bg-info text-dark";
+      case "Emergency Full Day":
+        return "bg-danger text-white";
+      case "Emergency Half Day":
+        return "bg-secondary text-white";
       default:
-        return 'bg-light';
+        return "bg-light";
     }
-  };
-
-  const days = getDaysInMonth(year, month);
+  }, [leaveData, selectedEmployee]);
 
   return (
     <div className="p-4">
@@ -102,13 +160,13 @@ const LeavePlan = () => {
       <Row>
         <Col md={4}>
           <Card className="shadow border-0 rounded-4">
-            <Card.Header className="fw-semibold">Employees</Card.Header>
+            <Card.Header className="fw-semibold">Employees List</Card.Header>
             <ListGroup variant="flush">
               {employees.map((emp) => (
                 <ListGroup.Item
-                  key={emp.id}
+                  key={emp._id}
                   action
-                  active={selectedEmployee?.id === emp.id}
+                  active={selectedEmployee?._id === emp._id}
                   onClick={() => setSelectedEmployee(emp)}
                   className="d-flex justify-content-between align-items-center"
                 >
@@ -133,7 +191,9 @@ const LeavePlan = () => {
                     onChange={(e) => setMonth(parseInt(e.target.value))}
                   >
                     {months.map((m, idx) => (
-                      <option value={idx} key={idx}>{m}</option>
+                      <option value={idx} key={idx}>
+                        {m}
+                      </option>
                     ))}
                   </Form.Select>
                   <Form.Select
@@ -142,7 +202,9 @@ const LeavePlan = () => {
                     onChange={(e) => setYear(parseInt(e.target.value))}
                   >
                     {years.map((y) => (
-                      <option key={y} value={y}>{y}</option>
+                      <option key={y} value={y}>
+                        {y}
+                      </option>
                     ))}
                   </Form.Select>
                 </div>
@@ -155,33 +217,36 @@ const LeavePlan = () => {
                     onClick={() => handleDayClick(date)}
                     className={`p-2 calendar-cell border text-center ${getLeaveTypeClass(date)}`}
                     style={{
-                      width: '14.28%',
-                      minHeight: '80px',
-                      cursor: 'pointer',
-                      fontSize: '0.85rem',
-                      border: '1px solid #dee2e6',
-                      borderRadius: '4px',
+                      width: "14.28%",
+                      minHeight: "80px",
+                      cursor: "pointer",
+                      fontSize: "0.85rem",
+                      border: "1px solid #dee2e6",
+                      borderRadius: "4px",
                     }}
                   >
                     <div>{dayjs(date).date()}</div>
-                    {leaveData[selectedEmployee.id]?.[date] && (
-                      <small className="d-block mt-1">{leaveData[selectedEmployee.id][date].type}</small>
+                    {leaveData[selectedEmployee._id]?.[date] && (
+                      <small className="d-block mt-1">
+                        {leaveData[selectedEmployee._id][date].type}
+                      </small>
                     )}
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <p className="text-muted mt-4">Select an employee to view or assign leaves.</p>
+            <p className="text-muted mt-4">
+              Select an employee to view or assign leaves.
+            </p>
           )}
         </Col>
       </Row>
 
-      {/* Modal for leave input */}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>
-            Mark Leave - {dayjs(selectedDate).format('DD MMM YYYY')}
+            Mark Leave - {dayjs(selectedDate).format("DD MMM YYYY")}
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
@@ -192,7 +257,9 @@ const LeavePlan = () => {
               onChange={(e) => setLeaveType(e.target.value)}
             >
               {leaveTypes.map((type, idx) => (
-                <option key={idx} value={type}>{type}</option>
+                <option key={idx} value={type}>
+                  {type}
+                </option>
               ))}
             </Form.Select>
           </Form.Group>
@@ -208,8 +275,12 @@ const LeavePlan = () => {
           </Form.Group>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowModal(false)}>Cancel</Button>
-          <Button variant="primary" onClick={handleSaveLeave}>Save Leave</Button>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Cancel
+          </Button>
+          <Button variant="primary" onClick={handleSaveLeave}>
+            Save Leave
+          </Button>
         </Modal.Footer>
       </Modal>
     </div>

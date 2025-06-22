@@ -34,9 +34,10 @@ const ViewAttendance = () => {
     fetchAttendanceData();
   }, [fetchAttendanceData]);
 
-  const handleCardClick = useCallback((id) => {
-    navigate(`/employee-attendance/${id}`);
-  }, [navigate]);
+const handleCardClick = useCallback((id) => {
+  const [year, month] = selectedMonth.split('-');
+  navigate(`/employee-attendance/${id}?month=${month}&year=${year}`);
+}, [navigate, selectedMonth]);
 
   const displayMonth = useCallback((monthStr) => {
     const [year, month] = monthStr.split('-');

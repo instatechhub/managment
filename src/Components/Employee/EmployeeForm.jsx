@@ -212,7 +212,7 @@ const EmployeeForm = () => {
 
               {/* Bank Details Section */}
               <Col xs={12}>
-                <h5 className="mt-4 mb-2">Bank Details</h5>
+                <h5 className="mt-4 mb-2">Bank Details (Optional)</h5>
               </Col>
 
               <Col md={6}>
