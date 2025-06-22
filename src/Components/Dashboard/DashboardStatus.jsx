@@ -143,7 +143,6 @@ const DashboardStats = () => {
         </Col>
       </Row>
 
-      {/* Stats Cards */}
       <Row className="g-4 mb-4">
         <h2>Employee Attendance Tracker - Today</h2>
         {stats.map((item, idx) => (
@@ -190,7 +189,6 @@ const DashboardStats = () => {
         ))}
       </Row>
 
-      {/* Filtered Employees */}
       <Row className="mb-4">
         <Col>
           <h5 className="mb-3">
