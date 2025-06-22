@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, Row, Col, Badge } from 'react-bootstrap';
+import { Card, Row, Col, Badge, ListGroup } from 'react-bootstrap';
 import { FaUserTie } from 'react-icons/fa';
 import useManagerStore from '../../Store/AuthStore/ManagerStore';
 import useAuthStore from '../../Store/AuthStore/AuthStore';
@@ -24,6 +24,12 @@ const EmployeeList = () => {
       <h3 className="fw-bold mb-4 text-dark">
         Employees List
       </h3>
+
+      {employees?.length === 0 ? (
+          <ListGroup.Item className="text-center text-muted">
+            No Employee Found
+          </ListGroup.Item>
+        ) : (
       <Row className="g-4">
         {employees.map((emp) => (
           <Col key={emp.id} xs={12} sm={6} md={4}>
@@ -59,6 +65,7 @@ const EmployeeList = () => {
           </Col>
         ))}
       </Row>
+        )}
     </div>
   );
 };

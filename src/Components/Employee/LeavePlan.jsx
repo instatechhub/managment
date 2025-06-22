@@ -156,7 +156,11 @@ const LeavePlan = () => {
   return (
     <div className="p-4">
       <h4 className="mb-4 fw-bold">Leave Planning</h4>
-
+{employees?.length === 0 ? (
+    <ListGroup.Item className="text-center text-muted">
+      No Employee Found
+    </ListGroup.Item>
+  ) : (
       <Row>
         <Col md={4}>
           <Card className="shadow border-0 rounded-4">
@@ -242,7 +246,7 @@ const LeavePlan = () => {
           )}
         </Col>
       </Row>
-
+  )}
       <Modal show={showModal} onHide={() => setShowModal(false)}>
         <Modal.Header closeButton>
           <Modal.Title>

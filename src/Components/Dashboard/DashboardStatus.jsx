@@ -28,42 +28,79 @@ const iconMap = {
   "Half Day": <FaUserClock />,
 };
 
+const defaultChartData = {
+  labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+  datasets: [
+    {
+      label: "Present",
+      data: [0, 0, 0, 0],
+      backgroundColor: "rgba(40, 167, 69, 0.6)",
+    },
+    {
+      label: "Absent",
+      data: [0, 0, 0, 0],
+      backgroundColor: "rgba(220, 53, 69, 0.6)",
+    },
+    {
+      label: "Half Day",
+      data: [0, 0, 0, 0],
+      backgroundColor: "rgba(255, 193, 7, 0.6)",
+    },
+  ],
+};
+const chartOptions = {
+  responsive: true,
+  plugins: {
+    legend: { position: "top" },
+    title: { display: true, text: "Monthly Attendance Overview" },
+  },
+  scales: {
+    y: {
+      beginAtZero: true,
+      ticks: {
+        stepSize: 5,
+        precision: 0,
+        callback: function (value) {
+          return Number.isInteger(value) ? value : null;
+        },
+      },
+      suggestedMax: 200,
+    },
+  },
+};
+
 const DashboardStats = () => {
   const [selectedStatus, setSelectedStatus] = useState("All");
   const [stats, setStats] = useState([]);
   const [todayEmployees, setTodayEmployees] = useState([]);
-  const [chartData, setChartData] = useState(null);
+  const [chartData, setChartData] = useState(defaultChartData);
   const [loading, setLoading] = useState(true);
-  const {getAttandanceTrack}=useManagerStore();
-  const {user} = useAuthStore();
 
-useEffect(() => {
-  if (!user?._id) return;
+  const { getAttandanceTrack } = useManagerStore();
+  const { user } = useAuthStore();
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await getAttandanceTrack(user._id);
-      console.log(response, "kklk");
+  useEffect(() => {
+    if (!user?._id) return;
 
-      if (response.status !== 200) throw new Error("Failed to fetch data");
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const response = await getAttandanceTrack(user._id);
+        if (response.status !== 200) throw new Error("Failed to fetch data");
 
-      // Axios response data is in response.data
-      const data = response.data;
+        const data = response.data;
+        setStats(data.stats || []);
+        setTodayEmployees(data.todayEmployees || []);
+        setChartData(data.chartData || defaultChartData);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-      setStats(data.stats);
-      setTodayEmployees(data.todayEmployees);
-      setChartData(data.chartData);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  fetchData();
-}, [user]);
-
+    fetchData();
+  }, [user]);
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -95,42 +132,33 @@ useEffect(() => {
 
   return (
     <div className="px-3">
-      {/* Monthly Chart */}
+      {/* Chart Section */}
       <Row className="mt-4 mb-5">
         <Col>
           <Card className="shadow-sm border-0 rounded-4">
             <Card.Body>
-              {chartData ? (
-                <Bar data={chartData} options={{
-                  responsive: true,
-                  plugins: {
-                    legend: { position: "top" },
-                    title: { display: true, text: "Monthly Attendance Overview" },
-                  },
-                }} />
-              ) : (
-                <p>No attendance data available.</p>
-              )}
+              <Bar data={chartData} options={chartOptions} />
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
-      {/* Stat Cards */}
+      {/* Stats Cards */}
       <Row className="g-4 mb-4">
-        <h2>Today's Employees</h2>
+        <h2>Employee Attendance Tracker - Today</h2>
         {stats.map((item, idx) => (
           <Col xs={12} sm={6} md={3} key={idx}>
             <div
               onClick={() => setSelectedStatus(item.status)}
               style={{
-                background: item.status === "All"
-                  ? "linear-gradient(135deg, #007bff, #6610f2)"
-                  : item.status === "Present"
+                background:
+                  item.status === "All"
+                    ? "linear-gradient(135deg, #007bff, #6610f2)"
+                    : item.status === "Present"
                     ? "linear-gradient(135deg, #28a745, #218838)"
                     : item.status === "Absent"
-                      ? "linear-gradient(135deg, #dc3545, #c82333)"
-                      : "linear-gradient(135deg, #ffc107, #e0a800)",
+                    ? "linear-gradient(135deg, #dc3545, #c82333)"
+                    : "linear-gradient(135deg, #ffc107, #e0a800)",
                 color: "#fff",
                 borderRadius: "16px",
                 padding: "1.5rem",
@@ -162,7 +190,7 @@ useEffect(() => {
         ))}
       </Row>
 
-      {/* Filtered Employee Cards */}
+      {/* Filtered Employees */}
       <Row className="mb-4">
         <Col>
           <h5 className="mb-3">

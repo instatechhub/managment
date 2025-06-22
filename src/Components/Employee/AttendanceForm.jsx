@@ -54,7 +54,7 @@ const AttendanceForm = () => {
         }, {});
         setAttendance(initial);
       } catch (err) {
-        setError('Failed to load employees. Please try again later.');
+        setError('Please Add Employee First then try again');
       } finally {
         setLoading(false);
       }
@@ -136,54 +136,63 @@ const AttendanceForm = () => {
 
       {loading ? (
         <div className="text-center my-5">
-          <Spinner animation="border" variant="primary" />
+          <Spinner animation="border" variant="dark" />
           <div className="mt-2 text-muted">Loading employees...</div>
         </div>
       ) : (
         <>
-          <Row className="g-4 mt-3">
-            {activeEmployees.map((emp) => (
-              <Col xs={12} sm={6} md={4} lg={3} key={emp._id}>
-                <Card className="h-100 shadow-sm border-0 rounded-4 p-3">
-                  <Card.Body className="d-flex flex-column justify-content-between">
-                    <div>
-                      <h6 className="fw-semibold text-truncate">{emp.name?.toUpperCase()}</h6>
-                      <div className="text-muted small">{emp._id}</div>
-                    </div>
+         <Row className="g-4 mt-3">
+  {activeEmployees.length === 0 ? (
+    <Col>
+      <div className="text-center text-muted fw-semibold fs-5 py-5">
+        No Employee Active
+      </div>
+    </Col>
+  ) : (
+    activeEmployees.map((emp) => (
+      <Col xs={12} sm={6} md={4} lg={3} key={emp._id}>
+        <Card className="h-100 shadow-sm border-0 rounded-4 p-3">
+          <Card.Body className="d-flex flex-column justify-content-between">
+            <div>
+              <h6 className="fw-semibold text-truncate">{emp.name?.toUpperCase()}</h6>
+              <div className="text-muted small">{emp._id}</div>
+            </div>
 
-                    <div className="mt-3 d-flex justify-content-between align-items-center">
-                      <Dropdown as={ButtonGroup} className="w-100">
-                        <Button
-                          variant={getStatusVariant(attendance[emp._id])}
-                          className="rounded-pill w-100 text-truncate"
-                        >
-                          {attendance[emp._id]}
-                        </Button>
-                        <Dropdown.Toggle
-                          split
-                          variant="light"
-                          className="rounded-pill border"
-                          id={`dropdown-${emp._id}`}
-                        />
-                        <Dropdown.Menu className="shadow-sm rounded-3 w-100">
-                          {attendanceOptions.map((option) => (
-                            <Dropdown.Item
-                              key={option.label}
-                              onClick={() => changeStatus(emp._id, option.label)}
-                              className="d-flex align-items-center"
-                            >
-                              {option.icon}
-                              {option.label}
-                            </Dropdown.Item>
-                          ))}
-                        </Dropdown.Menu>
-                      </Dropdown>
-                    </div>
-                  </Card.Body>
-                </Card>
-              </Col>
-            ))}
-          </Row>
+            <div className="mt-3 d-flex justify-content-between align-items-center">
+              <Dropdown as={ButtonGroup} className="w-100">
+                <Button
+                  variant={getStatusVariant(attendance[emp._id])}
+                  className="rounded-pill w-100 text-truncate"
+                >
+                  {attendance[emp._id]}
+                </Button>
+                <Dropdown.Toggle
+                  split
+                  variant="light"
+                  className="rounded-pill border"
+                  id={`dropdown-${emp._id}`}
+                />
+                <Dropdown.Menu className="shadow-sm rounded-3 w-100">
+                  {attendanceOptions.map((option) => (
+                    <Dropdown.Item
+                      key={option.label}
+                      onClick={() => changeStatus(emp._id, option.label)}
+                      className="d-flex align-items-center"
+                    >
+                      {option.icon}
+                      {option.label}
+                    </Dropdown.Item>
+                  ))}
+                </Dropdown.Menu>
+              </Dropdown>
+            </div>
+          </Card.Body>
+        </Card>
+      </Col>
+    ))
+  )}
+</Row>
+
 
           <div className="text-center mt-5">
             <Button
