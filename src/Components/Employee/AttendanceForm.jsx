@@ -251,27 +251,31 @@ const AttendanceForm = () => {
               ))
             )}
           </Row>
-
+          
           {isToday && (
             <div className="text-center mt-5">
-              <Button
-                variant="primary"
-                size="lg"
-                className="px-5 py-2 rounded-pill shadow"
-                onClick={handleSubmit}
-                disabled={submitting}
-              >
-                {submitting ? (
-                  <>
-                    <Spinner animation="border" size="sm" className="me-2" />
-                    Submitting...
-                  </>
-                ) : (
-                  "Submit Attendance"
-                )}
-              </Button>
+{Array.isArray(activeEmployees) && activeEmployees.length > 0 && (
+  <Button
+    variant="primary"
+    size="lg"
+    className="px-5 py-2 rounded-pill shadow"
+    onClick={handleSubmit}
+    disabled={submitting}
+  >
+    {submitting ? (
+      <>
+        <Spinner animation="border" size="sm" className="me-2" />
+        Submitting...
+      </>
+    ) : (
+      "Submit Attendance"
+    )}
+  </Button>
+)}
+
             </div>
           )}
+          
         </>
       )}
     </Container>

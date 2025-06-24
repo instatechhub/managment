@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Container, Row, Col, Card } from 'react-bootstrap';
+import { Container, Row, Col, Card, Spinner } from 'react-bootstrap';
 import { FaUserCircle } from 'react-icons/fa';
 import useManagerStore from '../../Store/AuthStore/ManagerStore';
 import useAuthStore from '../../Store/AuthStore/AuthStore';
@@ -14,11 +14,14 @@ const ViewAttendance = () => {
   const maxMonth = useMemo(() => today.toISOString().slice(0, 7), [today]);
   const [selectedMonth, setSelectedMonth] = useState(maxMonth);
   const [attendanceData, setAttendanceData] = useState([]);
+  const [loading, setLoading] = useState(false); 
 
   const fetchAttendanceData = useCallback(async () => {
     if (!user?._id || !selectedMonth) return;
     const [year, month] = selectedMonth.split('-');
+
     try {
+      setLoading(true); 
       const response = await viewAttendanceList({
         managerId: user._id,
         month: parseInt(month),
@@ -27,6 +30,8 @@ const ViewAttendance = () => {
       setAttendanceData(response);
     } catch (error) {
       console.error("Failed to fetch attendance data:", error);
+    } finally {
+      setLoading(false); 
     }
   }, [user?._id, selectedMonth, viewAttendanceList]);
 
@@ -34,10 +39,10 @@ const ViewAttendance = () => {
     fetchAttendanceData();
   }, [fetchAttendanceData]);
 
-const handleCardClick = useCallback((id) => {
-  const [year, month] = selectedMonth.split('-');
-  navigate(`/employee-attendance/${id}?month=${month}&year=${year}`);
-}, [navigate, selectedMonth]);
+  const handleCardClick = useCallback((id) => {
+    const [year, month] = selectedMonth.split('-');
+    navigate(`/employee-attendance/${id}?month=${month}&year=${year}`);
+  }, [navigate, selectedMonth]);
 
   const displayMonth = useCallback((monthStr) => {
     const [year, month] = monthStr.split('-');
@@ -69,7 +74,12 @@ const handleCardClick = useCallback((id) => {
         />
       </div>
 
-      {filteredEmployees.length === 0 ? (
+      {loading ? (
+        <div className="text-center my-5">
+          <Spinner animation="border" variant="dark" />
+          <div className="mt-2 text-muted">Loading attendance data...</div>
+        </div>
+      ) : filteredEmployees.length === 0 ? (
         <p className="text-center text-muted">
           No attendance records found for {displayMonth(selectedMonth)}
         </p>
