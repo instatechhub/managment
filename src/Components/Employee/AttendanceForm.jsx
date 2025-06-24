@@ -202,7 +202,7 @@ const AttendanceForm = () => {
                         <h6 className="fw-semibold text-truncate">
                           {emp.name?.toUpperCase()}
                         </h6>
-                        <div className="text-muted small">{emp._id}</div>
+                        {/* <div className="text-muted small">{emp._id}</div> */}
                         {getPreviousStatus(emp._id) && (
                           <div className="text-muted small mt-1">
                             Previous:{" "}
