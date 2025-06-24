@@ -160,7 +160,7 @@ const useManagerStore = create((set) => ({
     }
   },
 
-  employeeUpdateDetails: async (employeeId,payload) => {
+  employeeUpdateDetails: async (employeeId, payload) => {
     set({ loading: true, error: null });
     try {
       const response = await api.post(
@@ -173,6 +173,23 @@ const useManagerStore = create((set) => ({
       throw error;
     }
   },
+
+employeeDateWiseAttandace: async (managerId,date) => {
+
+  console.log(managerId, date, "store")
+  set({ loading: true, error: null });
+  try {
+    const response = await api.get(`/manager/getDateWiseAttandance`, {
+      params: { managerId:managerId, date:date },
+    });
+    set({ loading: false });
+    return response.data;
+  } catch (error) {
+    set({ error: error.message, loading: false });
+    throw error;
+  }
+},
+
 }));
 
 export default useManagerStore;
