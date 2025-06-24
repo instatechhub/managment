@@ -22,12 +22,11 @@ const ViewReport = () => {
         if (response?.success) {
           setRecords(response.report);
 
-          // Initialize editable fields
           const initialData = {};
           response.report.forEach(emp => {
             initialData[emp.employeeId] = {
               monthlySalary: Number(emp.salary) || 0,
-              allowedWeekOffs: 4, // default
+              allowedWeekOffs: 4,
             };
           });
           setEmployeeData(initialData);
@@ -54,13 +53,13 @@ const ViewReport = () => {
     const exportData = records.map((emp) => {
       const empData = employeeData[emp.employeeId] || {};
       const salary = empData.monthlySalary || 0;
+      const totalDays = emp.totalDays || 30;
       const allowedWeekOffs = empData.allowedWeekOffs || 0;
-      const perDaySalary = salary / emp.totalDays;
-      const weekOffTaken = emp.absentDays - emp.absentDaysWithoutWeekOff;
-      const extraWeekOff = Math.max(0, weekOffTaken - allowedWeekOffs);
-      const payableDays = emp.presentDays + 0.5 * emp.halfDays;
-      const deduction = extraWeekOff * perDaySalary;
-      const finalSalary = payableDays * perDaySalary - deduction;
+      const perDaySalary = salary / totalDays;
+      const payableDays = emp.presentDays + 0.5 * emp.halfDays + allowedWeekOffs;
+      const unpaidDays = Math.max(0, totalDays - payableDays);
+      const deduction = unpaidDays * perDaySalary;
+      const finalSalary = salary - deduction;
 
       return {
         Employee: emp.name,
@@ -70,7 +69,7 @@ const ViewReport = () => {
         'Half Day': emp.halfDays,
         Absent: emp.absentDays,
         'Allowed Week Offs': allowedWeekOffs,
-        'Extra Week Offs': extraWeekOff,
+        'Unpaid Days': unpaidDays,
         'Deduction (₹)': deduction.toFixed(2),
         'Final Salary (₹)': finalSalary.toFixed(2),
       };
@@ -134,7 +133,7 @@ const ViewReport = () => {
             <th>Half Day</th>
             <th>Absent</th>
             <th>Allowed Week Offs</th>
-            <th>Extra Week Offs</th>
+            <th>Unpaid Days</th>
             <th>Deduction (₹)</th>
             <th>Final Salary (₹)</th>
           </tr>
@@ -148,13 +147,13 @@ const ViewReport = () => {
             records.map((emp, idx) => {
               const empData = employeeData[emp.employeeId] || {};
               const salary = empData.monthlySalary || 0;
+              const totalDays = emp.totalDays || 30;
               const allowedWeekOffs = empData.allowedWeekOffs || 0;
-              const perDaySalary = salary / emp.totalDays;
-              const weekOffTaken = emp.absentDays|| 0;
-              const extraWeekOff = Math.max(0, weekOffTaken - allowedWeekOffs);
-              const payableDays = emp.presentDays + 0.5 * emp.halfDays;
-              const deduction = extraWeekOff * perDaySalary;
-              const finalSalary = payableDays * perDaySalary - deduction;
+              const perDaySalary = salary / totalDays;
+              const payableDays = emp.presentDays + 0.5 * emp.halfDays + allowedWeekOffs;
+              const unpaidDays = Math.max(0, totalDays - payableDays);
+              const deduction = unpaidDays * perDaySalary;
+              const finalSalary = salary - deduction;
 
               return (
                 <tr key={idx}>
@@ -177,7 +176,7 @@ const ViewReport = () => {
                       onChange={(e) => handleChange(emp.employeeId, 'allowedWeekOffs', e.target.value)}
                     />
                   </td>
-                  <td>{extraWeekOff}</td>
+                  <td>{unpaidDays}</td>
                   <td>₹ {deduction.toFixed(2)}</td>
                   <td><strong>₹ {finalSalary.toFixed(2)}</strong></td>
                 </tr>
