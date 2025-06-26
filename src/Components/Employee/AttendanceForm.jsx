@@ -83,9 +83,7 @@ const AttendanceForm = () => {
           const prevAttendance = response.attendance;
 
           const initialAttendance = activeEmployees?.reduce((acc, emp) => {
-            const found = prevAttendance.find(
-              (a) => a.employeeId === emp._id
-            );
+            const found = prevAttendance.find((a) => a.employeeId === emp._id);
             acc[emp._id] = found ? found.status : "Present";
             return acc;
           }, {});
@@ -155,7 +153,9 @@ const AttendanceForm = () => {
     <Container className="py-4">
       <div className="text-center mb-4">
         <h3 className="fw-bold">Daily Attendance</h3>
-        <p className="text-muted mb-2">Mark attendance for your team members.</p>
+        <p className="text-muted mb-2">
+          Mark attendance for your team members.
+        </p>
 
         <input
           type="date"
@@ -218,7 +218,11 @@ const AttendanceForm = () => {
                       </div>
 
                       <div className="mt-3 d-flex justify-content-between align-items-center">
-                        <Dropdown as={ButtonGroup} className="w-100" disabled={!isToday}>
+                        <Dropdown
+                          as={ButtonGroup}
+                          className="w-100"
+                          disabled={!isToday}
+                        >
                           <Button
                             variant={getStatusVariant(attendance[emp._id])}
                             className="rounded-pill w-100 text-truncate"
@@ -235,7 +239,9 @@ const AttendanceForm = () => {
                             {attendanceOptions.map((option) => (
                               <Dropdown.Item
                                 key={option.label}
-                                onClick={() => changeStatus(emp._id, option.label)}
+                                onClick={() =>
+                                  changeStatus(emp._id, option.label)
+                                }
                                 className="d-flex align-items-center"
                               >
                                 {option.icon}
@@ -251,31 +257,27 @@ const AttendanceForm = () => {
               ))
             )}
           </Row>
-          
-          {isToday && (
-            <div className="text-center mt-5">
-{Array.isArray(activeEmployees) && activeEmployees.length > 0 && (
-  <Button
-    variant="primary"
-    size="lg"
-    className="px-5 py-2 rounded-pill shadow"
-    onClick={handleSubmit}
-    disabled={submitting}
-  >
-    {submitting ? (
-      <>
-        <Spinner animation="border" size="sm" className="me-2" />
-        Submitting...
-      </>
-    ) : (
-      "Submit Attendance"
-    )}
-  </Button>
-)}
 
-            </div>
-          )}
-          
+          <div className="text-center mt-5">
+            {Array.isArray(activeEmployees) && activeEmployees.length > 0 && (
+              <Button
+                variant="primary"
+                size="lg"
+                className="px-5 py-2 rounded-pill shadow"
+                onClick={handleSubmit}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <>
+                    <Spinner animation="border" size="sm" className="me-2" />
+                    Submitting...
+                  </>
+                ) : (
+                  "Submit Attendance"
+                )}
+              </Button>
+            )}
+          </div>
         </>
       )}
     </Container>
