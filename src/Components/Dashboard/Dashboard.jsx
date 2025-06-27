@@ -16,7 +16,6 @@ const Dashboard = () => {
           {user?.processName?.toUpperCase()}
         </h2>
       </div>
-
       <DashboardStats />
     </div>
   );
