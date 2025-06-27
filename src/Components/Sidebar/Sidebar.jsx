@@ -19,6 +19,7 @@ const Sidebar = () => {
     { path: '/dashboard', label: 'Dashboard', icon: <FaTachometerAlt /> },
     { path: '/add-employee', label: 'Add Employee', icon: <FaUserPlus /> },
     { path: '/mark-attendance', label: 'Mark Attendance', icon: <FaCalendarCheck /> },
+    { path: '/break', label: 'Break', icon: <FaTachometerAlt /> },
     { path: '/view-attendance', label: 'View Attendance', icon: <FaClipboardList /> },
     { path: '/leave-plan', label: 'Leave Plan', icon: <FaRegCalendarAlt /> },
     { path: '/reports', label: 'Reports', icon: <FaChartBar /> },

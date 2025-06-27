@@ -7,13 +7,13 @@ const Dashboard = () => {
   return (
     <div className="container">
       <div className="d-flex justify-content-between">
-        <h2 className="mt-3">
-          Welcome,{" "}
+        <h2 className="mt-3 responsive-heading">
+          Welcome,
           {typeof user?.name === "string" ? user.name.toUpperCase() : "NA"}
         </h2>
-        <h2>
+        <h2 className="mt-3 responsive-heading" >
           Process: 
-          {" "}{user?.processName?.toUpperCase()}
+          {user?.processName?.toUpperCase()}
         </h2>
       </div>
 
