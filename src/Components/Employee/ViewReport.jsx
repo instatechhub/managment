@@ -191,6 +191,7 @@ const ViewReport = () => {
           </tr>
         </thead>
         <tbody>
+        
           {loading ? (
             <tr>
               <td colSpan="10" className="text-center py-4">
