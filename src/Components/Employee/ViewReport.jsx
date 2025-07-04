@@ -1,8 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { Container, Table, Form, Button, Row, Col, Card } from 'react-bootstrap';
-import * as XLSX from 'xlsx';
-import useManagerStore from '../../Store/AuthStore/ManagerStore';
-import useAuthStore from '../../Store/AuthStore/AuthStore';
+import React, { useEffect, useState } from "react";
+import {
+  Container,
+  Table,
+  Form,
+  Button,
+  Row,
+  Col,
+  Card,
+} from "react-bootstrap";
+import * as XLSX from "xlsx";
+import useManagerStore from "../../Store/AuthStore/ManagerStore";
+import useAuthStore from "../../Store/AuthStore/AuthStore";
 
 const ViewReport = () => {
   const today = new Date();
@@ -12,18 +20,20 @@ const ViewReport = () => {
   const { getMonthlyReport } = useManagerStore();
   const { user } = useAuthStore();
   const [records, setRecords] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!user?._id) return;
 
     const fetchData = async () => {
+      setLoading(true);
       try {
         const response = await getMonthlyReport(user._id, month, year);
         if (response?.success) {
           setRecords(response.report);
 
           const initialData = {};
-          response.report.forEach(emp => {
+          response.report.forEach((emp) => {
             initialData[emp.employeeId] = {
               monthlySalary: Number(emp.salary) || 0,
               allowedWeekOffs: 4,
@@ -33,6 +43,8 @@ const ViewReport = () => {
         }
       } catch (error) {
         console.error("Failed to fetch monthly report:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -40,7 +52,7 @@ const ViewReport = () => {
   }, [user, month, year]);
 
   const handleChange = (id, field, value) => {
-    setEmployeeData(prev => ({
+    setEmployeeData((prev) => ({
       ...prev,
       [id]: {
         ...prev[id],
@@ -50,34 +62,63 @@ const ViewReport = () => {
   };
 
   const handleDownload = () => {
+    const monthName = new Date(year, month).toLocaleString("default", {
+      month: "long",
+    });
+
     const exportData = records.map((emp) => {
       const empData = employeeData[emp.employeeId] || {};
       const salary = empData.monthlySalary || 0;
       const totalDays = emp.totalDays || 30;
       const allowedWeekOffs = empData.allowedWeekOffs || 0;
       const perDaySalary = salary / totalDays;
-      const payableDays = emp.presentDays + 0.5 * emp.halfDays + allowedWeekOffs;
-      const unpaidDays = Math.max(0, totalDays - payableDays);
-      const deduction = unpaidDays * perDaySalary;
-      const finalSalary = salary - deduction;
+
+      let payableDays = emp.presentDays + 0.5 * emp.halfDays;
+      const actualDays = emp.presentDays + 0.5 * emp.halfDays;
+
+      let finalSalary;
+      let unpaidDays = 0;
+      let deduction = 0;
+
+      if (actualDays >= totalDays) {
+        finalSalary = salary + allowedWeekOffs * perDaySalary;
+      } else {
+        payableDays += allowedWeekOffs;
+        unpaidDays = Math.max(0, totalDays - payableDays);
+        deduction = unpaidDays * perDaySalary;
+        finalSalary = salary - deduction;
+      }
 
       return {
         Employee: emp.name,
-        'Monthly Salary (₹)': salary,
-        'Per Day Salary (₹)': perDaySalary.toFixed(2),
+        "Monthly Salary (₹)": salary,
+        "Per Day Salary (₹)": perDaySalary.toFixed(2),
         Present: emp.presentDays,
-        'Half Day': emp.halfDays,
+        "Half Day": emp.halfDays,
         Absent: emp.absentDays,
-        'Allowed Week Offs': allowedWeekOffs,
-        'Unpaid Days': unpaidDays,
-        'Deduction (₹)': deduction.toFixed(2),
-        'Final Salary (₹)': finalSalary.toFixed(2),
+        "Allowed Week Offs": allowedWeekOffs,
+        "Unpaid Days": unpaidDays,
+        "Deduction (₹)": deduction.toFixed(2),
+        "Final Salary (₹)": finalSalary.toFixed(2),
       };
     });
 
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const worksheet = XLSX.utils.json_to_sheet([]);
+
+    XLSX.utils.sheet_add_aoa(worksheet, [
+      [`Attendance & Salary Report`],
+      [`Month:`, monthName],
+      [`Year:`, year],
+      [],
+    ]);
+
+    XLSX.utils.sheet_add_json(worksheet, exportData, {
+      origin: -1,
+      skipHeader: false,
+    });
+
     const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, 'Report');
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Report");
     XLSX.writeFile(workbook, `Attendance_Report_${year}_${month + 1}.xlsx`);
   };
 
@@ -90,10 +131,15 @@ const ViewReport = () => {
           <Row>
             <Col md={4}>
               <Form.Label>Select Month</Form.Label>
-              <Form.Select value={month} onChange={(e) => setMonth(Number(e.target.value))}>
+              <Form.Select
+                value={month + 1}
+                onChange={(e) => setMonth(Number(e.target.value) - 1)}
+              >
                 {Array.from({ length: 12 }, (_, i) => (
-                  <option key={i} value={i}>
-                    {new Date(0, i).toLocaleString('default', { month: 'long' })}
+                  <option key={i + 1} value={i + 1}>
+                    {new Date(0, i).toLocaleString("default", {
+                      month: "long",
+                    })}
                   </option>
                 ))}
               </Form.Select>
@@ -108,11 +154,17 @@ const ViewReport = () => {
                 max="2099"
               />
             </Col>
-            <Col md={4} className="d-flex align-items-end justify-content-between">
-              <Button variant="secondary" onClick={() => {
-                setMonth(today.getMonth());
-                setYear(today.getFullYear());
-              }}>
+            <Col
+              md={4}
+              className="d-flex align-items-end justify-content-between"
+            >
+              <Button
+                variant="secondary"
+                onClick={() => {
+                  setMonth(today.getMonth());
+                  setYear(today.getFullYear());
+                }}
+              >
                 Reset to Current
               </Button>
               <Button variant="success" onClick={handleDownload}>
@@ -139,9 +191,19 @@ const ViewReport = () => {
           </tr>
         </thead>
         <tbody>
-          {records.length === 0 ? (
+          {loading ? (
             <tr>
-              <td colSpan="10" className="text-center">No data available for this month.</td>
+              <td colSpan="10" className="text-center py-4">
+                <div className="spinner-border black" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+              </td>
+            </tr>
+          ) : records.length === 0 ? (
+            <tr>
+              <td colSpan="10" className="text-center">
+                No data available for this month.
+              </td>
             </tr>
           ) : (
             records.map((emp, idx) => {
@@ -150,10 +212,22 @@ const ViewReport = () => {
               const totalDays = emp.totalDays || 30;
               const allowedWeekOffs = empData.allowedWeekOffs || 0;
               const perDaySalary = salary / totalDays;
-              const payableDays = emp.presentDays + 0.5 * emp.halfDays + allowedWeekOffs;
-              const unpaidDays = Math.max(0, totalDays - payableDays);
-              const deduction = unpaidDays * perDaySalary;
-              const finalSalary = salary - deduction;
+
+              let payableDays = emp.presentDays + 0.5 * emp.halfDays;
+              const actualDays = emp.presentDays + 0.5 * emp.halfDays;
+
+              let finalSalary;
+              let unpaidDays = 0;
+              let deduction = 0;
+
+              if (actualDays >= totalDays) {
+                finalSalary = salary + allowedWeekOffs * perDaySalary;
+              } else {
+                payableDays += allowedWeekOffs;
+                unpaidDays = Math.max(0, totalDays - payableDays);
+                deduction = unpaidDays * perDaySalary;
+                finalSalary = salary - deduction;
+              }
 
               return (
                 <tr key={idx}>
@@ -162,7 +236,13 @@ const ViewReport = () => {
                     <Form.Control
                       type="number"
                       value={salary}
-                      onChange={(e) => handleChange(emp.employeeId, 'monthlySalary', e.target.value)}
+                      onChange={(e) =>
+                        handleChange(
+                          emp.employeeId,
+                          "monthlySalary",
+                          e.target.value
+                        )
+                      }
                     />
                   </td>
                   <td>₹ {perDaySalary.toFixed(2)}</td>
@@ -173,12 +253,20 @@ const ViewReport = () => {
                     <Form.Control
                       type="number"
                       value={allowedWeekOffs}
-                      onChange={(e) => handleChange(emp.employeeId, 'allowedWeekOffs', e.target.value)}
+                      onChange={(e) =>
+                        handleChange(
+                          emp.employeeId,
+                          "allowedWeekOffs",
+                          e.target.value
+                        )
+                      }
                     />
                   </td>
                   <td>{unpaidDays}</td>
                   <td>₹ {deduction.toFixed(2)}</td>
-                  <td><strong>₹ {finalSalary.toFixed(2)}</strong></td>
+                  <td>
+                    <strong>₹ {finalSalary.toFixed(2)}</strong>
+                  </td>
                 </tr>
               );
             })

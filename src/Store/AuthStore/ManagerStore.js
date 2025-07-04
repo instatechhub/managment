@@ -141,24 +141,24 @@ const useManagerStore = create((set) => ({
     }
   },
 
-  getMonthlyReport: async (managerId, month, year) => {
-    console.log(managerId, month, year);
-    set({ loading: true, error: null });
-    try {
-      const response = await api.get(`/manager/monthlyReport/${managerId}`, {
-        params: { month: 6, year },
-      });
+ getMonthlyReport: async (managerId, month, year) => {
+  console.log(managerId, month, year);
+  set({ loading: true, error: null });
+  try {
+    const response = await api.get(`/manager/monthlyReport/${managerId}`, {
+      params: { month: month + 1, year },
+    });
 
-      console.log("Monthly Report Response:", response.data);
+    console.log("Monthly Report Response:", response.data);
 
-      set({ loading: false });
-      return response.data;
-    } catch (error) {
-      console.error("Monthly Report Error:", error);
-      set({ error: error.message, loading: false });
-      throw error;
-    }
-  },
+    set({ loading: false });
+    return response.data;
+  } catch (error) {
+    console.error("Monthly Report Error:", error);
+    set({ error: error.message, loading: false });
+    throw error;
+  }
+},
 
   employeeUpdateDetails: async (employeeId, payload) => {
     set({ loading: true, error: null });
